@@ -1,0 +1,145 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Foto Otomatis - Template Polisi Satwa</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            margin-top: 20px;
+        }
+        #template {
+            position: relative;
+            display: inline-block;
+        }
+        #uploadedPhoto {
+            position: absolute;
+            top: 370px;
+            left: 148px;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: grab;
+            transform-origin: center center;
+        }
+        #fileInput {
+            display: none;
+        }
+        #uploadButton, #downloadButton {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #ff6600;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        #zoomControls {
+            margin: 10px;
+        }
+        button {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="template">
+        <img id="templateImage" src="Picsart_25-06-11_11-13-34-969.jpg" alt="Template Ulang Tahun" width="768">
+        <img id="uploadedPhoto" src="" alt="Foto yang Diupload" style="display: none;">
+    </div>
+
+    <br>
+    <button id="uploadButton">Tambah Foto</button>
+    <input type="file" id="fileInput" accept="image/*">
+
+    <div id="zoomControls" style="display:none;">
+        <button id="zoomIn">Zoom +</button>
+        <button id="zoomOut">Zoom -</button>
+    </div>
+
+    <button id="downloadButton" style="display:none;">Simpan Gambar</button>
+
+    <script>
+        const uploadButton = document.getElementById('uploadButton');
+        const fileInput = document.getElementById('fileInput');
+        const uploadedPhoto = document.getElementById('uploadedPhoto');
+        const zoomIn = document.getElementById('zoomIn');
+        const zoomOut = document.getElementById('zoomOut');
+        const zoomControls = document.getElementById('zoomControls');
+        const downloadButton = document.getElementById('downloadButton');
+        let scale = 1;
+
+        uploadButton.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    uploadedPhoto.src = e.target.result;
+                    uploadedPhoto.style.display = 'block';
+                    zoomControls.style.display = 'block';
+                    downloadButton.style.display = 'inline-block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        let isDragging = false;
+        let offset = { x: 0, y: 0 };
+
+        uploadedPhoto.addEventListener('mousedown', function (e) {
+            isDragging = true;
+            offset.x = e.offsetX;
+            offset.y = e.offsetY;
+            uploadedPhoto.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', function (e) {
+            if (isDragging) {
+                const templateRect = document.getElementById('template').getBoundingClientRect();
+                uploadedPhoto.style.left = (e.clientX - templateRect.left - offset.x) + 'px';
+                uploadedPhoto.style.top = (e.clientY - templateRect.top - offset.y) + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', function () {
+            isDragging = false;
+            uploadedPhoto.style.cursor = 'grab';
+        });
+
+        zoomIn.addEventListener('click', () => {
+            scale += 0.1;
+            uploadedPhoto.style.transform = `scale(${scale})`;
+        });
+
+        zoomOut.addEventListener('click', () => {
+            if (scale > 0.2) {
+                scale -= 0.1;
+                uploadedPhoto.style.transform = `scale(${scale})`;
+            }
+        });
+
+        downloadButton.addEventListener('click', () => {
+            const templateElement = document.getElementById('template');
+            html2canvas(templateElement).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'hasil-template.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+</body>
+</html>
